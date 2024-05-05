@@ -1,0 +1,138 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Гра2</title>
+  <style>
+    body {
+      font-family: Arial, sans-serif;
+      text-align: center;
+    }
+    #game {
+      margin-top: 50px;
+    }
+
+    #game-board {
+      display: flex;
+      flex-wrap: wrap;
+      justify-content: center;
+      gap: 15px;
+      border: 0px solid #000000;
+      padding: 10px;
+      width: 512px;
+      height: 512px;
+      margin: auto;
+    }
+    .image-board {
+      width: 75px;
+    }
+    #drop-area {
+      width: 200px;
+      height: 200px;
+      border: 0px solid #000000;
+      margin: auto;
+    }
+    .flex-div {
+      display: flex;
+      margin: auto;
+    }
+    .button {
+      margin-top: 20px;
+      padding: 10px 20px;
+      font-size: 16px;
+      background-color: #cc8dc6;
+      color: white;
+      border: none;
+      border-radius: 100px;
+      cursor: pointer;
+      transition: background-color 0.5s ease;
+    }
+    .button:hover {
+      background-color: #cc8d8d;
+    }
+  </style>
+</head>
+<body>
+  <div id="game">
+    <h1>Гра2</h1>
+    <button id="start-game" class="button">Почати</button>
+  </div>
+
+  <script src="https://code.jquery.com/jquery-3.6.0.js"></script>
+  <script src="https://code.jquery.com/ui/1.13.2/jquery-ui.js"></script>
+
+  <script>
+    $(document).ready(function () {
+      const endNumber = 25;
+      let images = [];
+      let score = 0;
+
+      // Функція початку гри
+      function startGame() {
+        // Встановлюємо початкові значення
+        $("#game").html(
+          `<div class="flex-div">
+            <div id="game-board"></div>
+            <div id="drop-area"></div>
+          </div><br><br>
+          <button id="restart-game" class="button">Почати з початку</button>`
+        );
+        score = 0;
+        generateGameBoard(); // Генеруємо ігрове поле
+        generateDropArea(); // Генеруємо область для перетягування
+      }
+
+      $("#start-game").click(startGame); // Встановлюємо обробник події для кнопки "Почати"
+
+      // Функція генерування ігрового поля
+      function generateGameBoard() {
+        images = Array.from({ length: endNumber }, () => Math.floor(Math.random() * 50 + 1)); // Генеруємо випадкові числа для картинок
+        let gameBoard = $("#game-board").empty(); // Очищаємо ігрове поле
+        images.forEach((img, index) => {
+          let imageElement = $(`<img class="image-board" src="img/${img}.png"/>`).draggable({ revert: true }); // Створюємо картинку та додаємо їй можливість перетягування
+          gameBoard.append(imageElement); // Додаємо картинку на ігрове поле
+          if ((index + 1) % 5 === 0) gameBoard.append('<br>'); // Додаємо рядок кожних 5 картинок
+        });
+      }
+
+      // Функція генерування області для перетягування
+      function generateDropArea() {
+        nextPic(); // Генеруємо першу картинку для перетягування
+      }
+
+      // Функція генерування наступної картинки для перетягування
+      function nextPic() {
+        let randPic = Math.floor(Math.random() * 25);
+        const srcString = `img/${images[randPic]}.png`;
+        $("#drop-area").html(`<img class="drop-image" src="${srcString}">`).droppable({
+          drop: function (event, ui) {
+            let droppedImage = ui.draggable.attr("src");
+            compareImages(srcString, droppedImage);
+          },
+        });
+      }
+
+      // Функція порівняння картинок
+      function compareImages(src1, src2) {
+        if (src1 === src2) {
+          console.log("yes"); // Логуємо вірне співпадіння
+          score++; // Збільшуємо лічильник вірних відповідей
+          if (score === 5) endGame(); // Якщо лічильник досягнув 5, закінчуємо гру
+          else nextPic(); // В іншому випадку генеруємо наступну картинку
+        } else endGame(); // Якщо картинки не співпадають, закінчуємо гру
+      }
+
+      // Функція завершення гри
+      function endGame() {
+        $("#game").html(
+          `<h2>Гру завершено!</h2>
+          <button id="restart-game" class="button">Почати з початку</button>`
+        );
+      }
+
+      $(document).on("click", "#restart-game", startGame); // Встановлюємо обробник події для кнопки "Почати з початку"
+    });
+  </script>
+</body>
+</html>
